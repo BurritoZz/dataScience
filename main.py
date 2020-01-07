@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-import sklearn
+import sklearn as sk
+import pandas as pd
 
-print('hello world')
-print('test')
+df = pd.read_csv('Data.csv')
+print(df.columns.values)
