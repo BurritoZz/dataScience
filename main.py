@@ -4,7 +4,12 @@ import pandas as pd
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
 from sklearn.impute import SimpleImputer
-import missingno as msno
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import confusion_matrix
+from sklearn import linear_model
+from sklearn.feature_selection import RFECV
 
 def ageToInt(ageList):
     res = []
@@ -32,6 +37,7 @@ imputer = SimpleImputer(missing_values=np.nan, strategy='median')
 
 data = pd.read_csv('Data.csv', sep=';')
 
+##Data preparation
 data['Age'] = ageToInt(data['Age'])
 data['Fever'] = data['Fever'].map(replaceZeroMostCommon)
 data['Duration_of_pain'] = imputer.fit_transform(data[['Duration_of_pain']])
@@ -58,18 +64,69 @@ data = data.drop(columns='working_ability')
 #print(data['Relationship_with_colleagues'].value_counts())
 #print(data['Relationship_with_colleagues'].count())
 #print(data)
-#msno.matrix(data).figure.savefig('output.png')
+
+
+##Feature Selection
+#X = data.iloc[:,1:34]
+#y = data.iloc[:,0]
+
+#bestfeatures = SelectKBest(score_func=chi2, k=10)
+#fit = bestfeatures.fit(X, y)
+#dfscores = pd.DataFrame(fit.scores_)
+#dfcolumns = pd.DataFrame(X.columns)
+#
+#featureScores = pd.concat([dfcolumns, dfscores], axis=1)
+#featureScores.columns = ['Specs', 'Score']
+#print(featureScores.nlargest(10, 'Score'))
+#
+#from sklearn.ensemble import ExtraTreesClassifier
+#import matplotlib.pyplot as plt
+#model = ExtraTreesClassifier()
+#model.fit(X,y)
+#print(model.feature_importances_)
+#feat_importances = pd.Series(model.feature_importances_, index=X.columns)
+#feat_importances.nlargest(10).plot(kind='barh')
+#plt.tight_layout()
+#plt.savefig('featureImportance')
+#
+#corrmat = data.corr()
+#top_corr_features = corrmat.index
+#plt.figure(figsize=(40,40))
+#g=sns.heatmap(data[top_corr_features].corr(),annot=True,cmap="RdYlGn")
+#plt.savefig('hetejongen')
+
+
+##Classification
+X = data[['Age', 'leg_left_pain_intensity', 'leg_right_pain_intensity', 'arm_right_pain_intensity', 'Decreased_mobility', 'neck_pain_intensity', 'Irrational_thoughts_work', 'Fever', 'Serious_disease', 'Uses_corticosteroids', 'Irrational_thoughts_risk_lasting', 'Coping_strategy', 'Relationship_with_colleagues', 'low_back_pain_intensity', 'Extremely_nervous', 'Kinesiophobia_pain_stop', 'Weightloss_per_year']]
+y = data['Treatment']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+#clf = RandomForestClassifier(n_estimators=100)
+#clf.fit(X_train, y_train)
+#y_test_pred = clf.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(clf.score(X_test, y_test))
+
+lin_reg = linear_model.RidgeClassifier()
+lin_reg.fit(X_train, y_train)
+y_test_pred = lin_reg.predict(X_test)
+print(confusion_matrix(y_test, y_test_pred))
+print(lin_reg.score(X_test, y_test))
+
 
 
 
 X = data.iloc[:,1:34]
 y = data.iloc[:,0]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+#clf = RandomForestClassifier(n_estimators=100)
+#clf.fit(X_train, y_train)
+#y_test_pred = clf.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(clf.score(X_test, y_test))
 
-bestfeatures = SelectKBest(score_func=chi2, k=10)
-fit = bestfeatures.fit(X, y)
-dfscores = pd.DataFrame(fit.scores_)
-dfcolumns = pd.DataFrame(X.columns)
-
-featureScores = pd.concat([dfcolumns, dfscores], axis=1)
-featureScores.columns = ['Specs', 'Score']
-print(featureScores.nlargest(10, 'Score'))
+lin_reg = linear_model.RidgeClassifier()
+lin_reg.fit(X_train, y_train)
+y_test_pred = lin_reg.predict(X_test)
+print(confusion_matrix(y_test, y_test_pred))
+print(lin_reg.score(X_test, y_test))
