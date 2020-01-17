@@ -4,13 +4,14 @@ import pandas as pd
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
 from sklearn.impute import SimpleImputer
-import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix
 from sklearn import linear_model
 from sklearn.feature_selection import RFECV
+from sklearn.kernel_ridge import KernelRidge
 
+## Data Preperation (functions):
 def ageToInt(ageList):
     res = []
     for age in ageList:
@@ -34,10 +35,9 @@ def replaceOneMostCommon(x):
 
 imputer = SimpleImputer(missing_values=np.nan, strategy='median')
 
-
 data = pd.read_csv('Data.csv', sep=';')
 
-##Data preparation
+## Data preparation:
 data['Age'] = ageToInt(data['Age'])
 data['Fever'] = data['Fever'].map(replaceZeroMostCommon)
 data['Duration_of_pain'] = imputer.fit_transform(data[['Duration_of_pain']])
@@ -56,7 +56,6 @@ data['Loss_muscle_strength'] = data['Loss_muscle_strength'].map(replaceOneMostCo
 data['Trauma'] = data['Trauma'].map(replaceZeroMostCommon) # Misschien deleten
 data['Incoordination'] = data['Incoordination'].map(replaceZeroMostCommon)
 data = data.drop(columns='working_ability')
-
 
 
 #print(data['Trauma'].value_counts())
@@ -113,9 +112,6 @@ y_test_pred = lin_reg.predict(X_test)
 print(confusion_matrix(y_test, y_test_pred))
 print(lin_reg.score(X_test, y_test))
 
-
-
-
 X = data.iloc[:,1:34]
 y = data.iloc[:,0]
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -125,8 +121,20 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 #print(confusion_matrix(y_test, y_test_pred))
 #print(clf.score(X_test, y_test))
 
-lin_reg = linear_model.RidgeClassifier()
-lin_reg.fit(X_train, y_train)
-y_test_pred = lin_reg.predict(X_test)
+#lin_reg = linear_model.RidgeClassifier()
+#lin_reg.fit(X_train, y_train)
+#y_test_pred = lin_reg.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(lin_reg.score(X_test, y_test))
+
+## Kernel_Ridge:
+ker_rid = KernelRidge(alpha=1.0)
+ker_rid.fit(X_train, y_train)
+y_test_pred = ker_rid.predict(X_test)
+y_test_pred = [int(round(x)) for x in y_test_pred]
 print(confusion_matrix(y_test, y_test_pred))
-print(lin_reg.score(X_test, y_test))
+print(ker_rid.score(X_test, y_test))
+
+
+
+
