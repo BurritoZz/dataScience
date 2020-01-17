@@ -12,6 +12,7 @@ from sklearn import linear_model
 from sklearn.feature_selection import RFECV
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+from sklearn import svm
 
 def ageToInt(ageList):
     res = []
@@ -204,3 +205,17 @@ quadDisc.fit(X_train, y_train)
 y_test_pred = quadDisc.predict(X_test)
 print(confusion_matrix(y_test, y_test_pred))
 print(quadDisc.score(X_test, y_test))
+
+print('SVC')
+svc = svm.SVC()
+svc.fit(X, y)
+y_test_pred = svc.predict(X_test)
+print(confusion_matrix(y_test, y_test_pred))
+print(svc.score(X_test, y_test))
+
+print('NuSVC')
+nuSvc = svm.NUSVC()
+nuSvc.fit(X, y)
+y_test_pred = nuSvc.predict(X_test)
+print(confusion_matrix(y_test, y_test_pred))
+print(nuSvc.score(X_test, y_test))
