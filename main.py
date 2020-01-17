@@ -5,7 +5,6 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix
 from sklearn import linear_model
 from sklearn.feature_selection import RFECV
@@ -13,6 +12,8 @@ from sklearn.kernel_ridge import KernelRidge
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn import svm
+from sklearn import naive_bayes
+from sklearn import ensemble
 
 ## Data Preperation (functions):
 def ageToInt(ageList):
@@ -104,7 +105,7 @@ X = data[['Age', 'leg_left_pain_intensity', 'leg_right_pain_intensity', 'arm_rig
 y = data['Treatment']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-#clf = RandomForestClassifier(n_estimators=100)
+#clf = ensemble.RandomForestClassifier(n_estimators=100)
 #clf.fit(X_train, y_train)
 #y_test_pred = clf.predict(X_test)
 #print(confusion_matrix(y_test, y_test_pred))
@@ -152,6 +153,55 @@ y_test_pred = quadDisc.predict(X_test)
 print(confusion_matrix(y_test, y_test_pred))
 print(quadDisc.score(X_test, y_test))
 
+print('SVC')
+svc = svm.SVC(gamma='scale')
+svc.fit(X_train, y_train)
+y_test_pred = svc.predict(X_test)
+print(confusion_matrix(y_test, y_test_pred))
+print(svc.score(X_test, y_test))
+
+print('LinearSVC')
+lin_svc = svm.LinearSVC()
+lin_svc.fit(X_train,y_train)
+y_test_pred = lin_svc.predict(X_test)
+print(confusion_matrix(y_test, y_test_pred))
+print(lin_svc.score(X_test, y_test))
+
+print('Gaussian Naive Bayes')
+gaussNB = naive_bayes.GaussionNB
+gaussNB.fit(X_train, y_train)
+y_test_pred = gaussNB.predict(X_test)
+print(confusion_matrix(y_test, y_test_pred))
+print(gaussNB.score(X_test, y_test))
+
+print("Multinomial Naive Bayes")
+multNB = naive_bayes.MultinomialNB()
+multNB.fit(X_train,y_train)
+y_test_pred = multNB.predict(X_test)
+print(confusion_matrix(y_test, y_test_pred))
+print(multNB.score(X_test,y_test))
+
+print('Complement Naive Bayes')
+compNB = naive_bayse.ComplementNB()
+compNB.fit(X_train, y_train)
+y_test_pred = compNB.predict(X_test)
+print(confusion_matrix(y_test, y_test_pred))
+print(compNB.score(X_test, y_test))
+
+print('Categorical Naive Bayes')
+catNB = naive_bayes.CategoricalNB()
+catNB.fit(X_train, y_train)
+y_test_pred = catNB.predict(X_test)
+print(confusion_matrix(y_test, y_test_pred))
+print(catNB.score(X_test, y_test))
+
+print('Gradient Boosting Classifier')
+gradBoost = ensemble.GradientBoostingClassifier()
+gradBoost.fit(X_train, y_train)
+y_test_pred = gradBoost.predict(X_test)
+print(confusion_matrix(y_test, y_test_pred))
+print(gradBoost.score(X_test, y_test))
+
 
 print('Without feature selection')
 X = data.iloc[:,1:34]
@@ -174,16 +224,13 @@ ker_rid = KernelRidge(alpha=1.0)
 ker_rid.fit(X_train, y_train)
 y_test_pred = ker_rid.predict(X_test)
 y_test_pred = [int(round(x)) for x in y_test_pred]
+
 print('Ridge')
 lin_reg = linear_model.RidgeClassifier()
 lin_reg.fit(X_train, y_train)
 y_test_pred = lin_reg.predict(X_test)
 print(confusion_matrix(y_test, y_test_pred))
 print(ker_rid.score(X_test, y_test))
-
-
-
-
 
 print('SGD')
 sgdClassifier = linear_model.SGDClassifier(max_iter=1000, tol=1e-3)
@@ -221,15 +268,50 @@ print(confusion_matrix(y_test, y_test_pred))
 print(quadDisc.score(X_test, y_test))
 
 print('SVC')
-svc = svm.SVC()
-svc.fit(X, y)
+svc = svm.SVC(gamma='scale')
+svc.fit(X_train, y_train)
 y_test_pred = svc.predict(X_test)
 print(confusion_matrix(y_test, y_test_pred))
 print(svc.score(X_test, y_test))
 
-print('NuSVC')
-nuSvc = svm.NUSVC()
-nuSvc.fit(X, y)
-y_test_pred = nuSvc.predict(X_test)
+print('LinearSVC')
+lin_svc = svm.LinearSVC()
+lin_svc.fit(X_train, y_train)
+y_test_pred = lin_svc.predict(X_test)
 print(confusion_matrix(y_test, y_test_pred))
-print(nuSvc.score(X_test, y_test))
+print(lin_svc.score(X_test, y_test))
+
+print('Gaussian Naive Bayes')
+gaussNB = naive_bayes.GaussionNB
+gaussNB.fit(X_train, y_train)
+y_test_pred = gaussNB.predict(X_test)
+print(confusion_matrix(y_test, y_test_pred))
+print(gaussNB.score(X_test, y_test))
+
+print("Multinomial Naive Bayes")
+multNB = naive_bayes.MultinomialNB()
+multNB.fit(X_train,y_train)
+y_test_pred = multNB.predict(X_test)
+print(confusion_matrix(y_test, y_test_pred))
+print(multNB.score(X_test,y_test))
+
+print('Complement Naive Bayes')
+compNB = naive_bayse.ComplementNB()
+compNB.fit(X_train, y_train)
+y_test_pred = compNB.predict(X_test)
+print(confusion_matrix(y_test, y_test_pred))
+print(compNB.score(X_test, y_test))
+
+print('Categorical Naive Bayes')
+catNB = naive_bayes.CategoricalNB()
+catNB.fit(X_train, y_train)
+y_test_pred = catNB.predict(X_test)
+print(confusion_matrix(y_test, y_test_pred))
+print(catNB.score(X_test, y_test))
+
+print('Gradient Boosting Classifier')
+gradBoost = ensemble.GradientBoostingClassifier()
+gradBoost.fit(X_train, y_train)
+y_test_pred = gradBoost.predict(X_test)
+print(confusion_matrix(y_test, y_test_pred))
+print(gradBoost.score(X_test, y_test))
