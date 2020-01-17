@@ -10,6 +10,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix
 from sklearn import linear_model
 from sklearn.feature_selection import RFECV
+from sklearn import svm
 
 def ageToInt(ageList):
     res = []
@@ -130,3 +131,17 @@ lin_reg.fit(X_train, y_train)
 y_test_pred = lin_reg.predict(X_test)
 print(confusion_matrix(y_test, y_test_pred))
 print(lin_reg.score(X_test, y_test))
+
+print('SVC')
+svc = svm.SVC()
+svc.fit(X, y)
+y_test_pred = svc.predict(X_test)
+print(confusion_matrix(y_test, y_test_pred))
+print(svc.score(X_test, y_test))
+
+print('NuSVC')
+nuSvc = svm.NUSVC()
+nuSvc.fit(X, y)
+y_test_pred = nuSvc.predict(X_test)
+print(confusion_matrix(y_test, y_test_pred))
+print(nuSvc.score(X_test, y_test))
