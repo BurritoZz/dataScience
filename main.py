@@ -47,24 +47,24 @@ imputer = SimpleImputer(missing_values=np.nan, strategy='median')
 data = pd.read_csv('Data.csv', sep=';')
 
 ## Data preparation:
-data['Age'] = ageToInt(data['Age'])
-data['Fever'] = data['Fever'].map(replaceZeroMostCommon)
-data['Duration_of_pain'] = imputer.fit_transform(data[['Duration_of_pain']])
-data = data.drop(columns=['Workoverload'])
-data['Extremely_nervous'] = imputer.fit_transform(data[['Extremely_nervous']])
-data['Relationship_with_colleagues'] = imputer.fit_transform(data[['Relationship_with_colleagues']]) # Misschien deleten
-data['Irrational_thoughts_risk_lasting'] = imputer.fit_transform(data[['Irrational_thoughts_risk_lasting']])
-data['Irrational_thoughts_work'] = imputer.fit_transform(data[['Irrational_thoughts_work']])
-data['Coping_strategy'] = imputer.fit_transform(data[['Coping_strategy']])
-data['Kinesiophobia_physical_exercise'] = imputer.fit_transform(data[['Kinesiophobia_physical_exercise']])
-data['Kinesiophobia_pain_stop'] = imputer.fit_transform(data[['Kinesiophobia_pain_stop']])
-data['Uses_corticosteroids'] = data['Uses_corticosteroids'].map(replaceZeroMostCommon)
-data['Serious_disease'] = data['Serious_disease'].map(replaceZeroMostCommon)
-data['Weightloss_per_year'] = imputer.fit_transform(data[['Weightloss_per_year']])
-data['Loss_muscle_strength'] = data['Loss_muscle_strength'].map(replaceOneMostCommon)
-data['Trauma'] = data['Trauma'].map(replaceZeroMostCommon) # Misschien deleten
-data['Incoordination'] = data['Incoordination'].map(replaceZeroMostCommon)
-data = data.drop(columns='working_ability')
+#data['Age'] = ageToInt(data['Age'])
+#data['Fever'] = data['Fever'].map(replaceZeroMostCommon)
+#data['Duration_of_pain'] = imputer.fit_transform(data[['Duration_of_pain']])
+#data = data.drop(columns=['Workoverload'])
+#data['Extremely_nervous'] = imputer.fit_transform(data[['Extremely_nervous']])
+#data['Relationship_with_colleagues'] = imputer.fit_transform(data[['Relationship_with_colleagues']]) # Misschien deleten
+#data['Irrational_thoughts_risk_lasting'] = imputer.fit_transform(data[['Irrational_thoughts_risk_lasting']])
+#data['Irrational_thoughts_work'] = imputer.fit_transform(data[['Irrational_thoughts_work']])
+#data['Coping_strategy'] = imputer.fit_transform(data[['Coping_strategy']])
+#data['Kinesiophobia_physical_exercise'] = imputer.fit_transform(data[['Kinesiophobia_physical_exercise']])
+#data['Kinesiophobia_pain_stop'] = imputer.fit_transform(data[['Kinesiophobia_pain_stop']])
+#data['Uses_corticosteroids'] = data['Uses_corticosteroids'].map(replaceZeroMostCommon)
+#data['Serious_disease'] = data['Serious_disease'].map(replaceZeroMostCommon)
+#data['Weightloss_per_year'] = imputer.fit_transform(data[['Weightloss_per_year']])
+#data['Loss_muscle_strength'] = data['Loss_muscle_strength'].map(replaceOneMostCommon)
+#data['Trauma'] = data['Trauma'].map(replaceZeroMostCommon) # Misschien deleten
+#data['Incoordination'] = data['Incoordination'].map(replaceZeroMostCommon)
+#data = data.drop(columns='working_ability')
 
 
 #print(data['Trauma'].value_counts())
@@ -375,3 +375,12 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 #y_test_pred = adaBoost.predict(X_test)
 #print(confusion_matrix(y_test, y_test_pred))
 #print(adaBoost.score(X_test, y_test))
+
+import autosklearn.classification
+import sklearn.model_selection
+import sklearn.datasets
+import sklearn.metrics
+automl = autosklearn.classification.AutoSklearnClassifier()
+automl.fit(X_train, y_train)
+y_hat = automl.predict(X_test)
+print('Accuracy score', sklearn.metrics.accuracy_score(y_test, y_hat))
