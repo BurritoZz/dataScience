@@ -245,9 +245,9 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 ## Classification (without feature selection):
 print('Without feature selection')
-X = data.iloc[:,1:34]
-y = data.iloc[:,0]
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train = data.iloc[:,1:34]
+y_train = data.iloc[:,0]
+#X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 #print('Ridge')
 #lin_reg = linear_model.RidgeClassifier()
@@ -380,7 +380,10 @@ import autosklearn.classification
 import sklearn.model_selection
 import sklearn.datasets
 import sklearn.metrics
-automl = autosklearn.classification.AutoSklearnClassifier()
+automl = autosklearn.classification.AutoSklearnClassifier(time_left_for_this_task=86400, per_run_time_limit=1800, seed=420, ml_memory_limit=8192, )
 automl.fit(X_train, y_train)
 y_hat = automl.predict(X_test)
 print('Accuracy score', sklearn.metrics.accuracy_score(y_test, y_hat))
+
+from joblib import dump, load
+dump(automl, 'best_classifier.joblib')
