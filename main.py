@@ -14,6 +14,11 @@ from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn import svm
 from sklearn import naive_bayes
 from sklearn import ensemble
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import RadiusNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import BaggingClassifier
+from sklearn.ensemble import AdaBoostClassifier
 
 ## Data Preperation (functions):
 def ageToInt(ageList):
@@ -69,7 +74,7 @@ data = data.drop(columns='working_ability')
 #print(data)
 
 
-##Feature Selection
+## Select features for feature selection
 #X = data.iloc[:,1:34]
 #y = data.iloc[:,0]
 
@@ -99,7 +104,7 @@ data = data.drop(columns='working_ability')
 #plt.savefig('hetejongen')
 
 
-##Classification
+## Classification (with feature selection):
 print('With feature selection')
 X = data[['Age', 'leg_left_pain_intensity', 'leg_right_pain_intensity', 'arm_right_pain_intensity', 'Decreased_mobility', 'neck_pain_intensity', 'Irrational_thoughts_work', 'Fever', 'Serious_disease', 'Uses_corticosteroids', 'Irrational_thoughts_risk_lasting', 'Coping_strategy', 'Relationship_with_colleagues', 'low_back_pain_intensity', 'Extremely_nervous', 'Kinesiophobia_pain_stop', 'Weightloss_per_year']]
 y = data['Treatment']
@@ -111,207 +116,262 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 #print(confusion_matrix(y_test, y_test_pred))
 #print(clf.score(X_test, y_test))
 
-print('Ridge')
-lin_reg = linear_model.RidgeClassifier()
-lin_reg.fit(X_train, y_train)
-y_test_pred = lin_reg.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(lin_reg.score(X_test, y_test))
-
-print('SGD')
-sgdClassifier = linear_model.SGDClassifier(max_iter=1000, tol=1e-3)
-sgdClassifier.fit(X_train,y_train)
-y_test_pred = sgdClassifier.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(sgdClassifier.score(X_test, y_test))
-
-print('Linear Discriminant Analysis svd')
-linDisc = LinearDiscriminantAnalysis(solver='svd')
-linDisc.fit(X_train, y_train)
-y_test_pred = linDisc.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(linDisc.score(X_test, y_test))
-
-print('Linear Discriminant Analysis lsqr')
-linDisc = LinearDiscriminantAnalysis(solver='lsqr')
-linDisc.fit(X_train, y_train)
-y_test_pred = linDisc.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(linDisc.score(X_test, y_test))
-
-print('Linear Discriminant Analysis eigen')
-linDisc = LinearDiscriminantAnalysis(solver='eigen')
-linDisc.fit(X_train, y_train)
-y_test_pred = linDisc.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(linDisc.score(X_test, y_test))
-
-print('Quadratic Discriminant Analysis')
-quadDisc = QuadraticDiscriminantAnalysis()
-quadDisc.fit(X_train, y_train)
-y_test_pred = quadDisc.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(quadDisc.score(X_test, y_test))
-
-print('SVC')
-svc = svm.SVC(gamma='scale')
-svc.fit(X_train, y_train)
-y_test_pred = svc.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(svc.score(X_test, y_test))
-
-print('LinearSVC')
-lin_svc = svm.LinearSVC()
-lin_svc.fit(X_train,y_train)
-y_test_pred = lin_svc.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(lin_svc.score(X_test, y_test))
-
-print('Gaussian Naive Bayes')
-gaussNB = naive_bayes.GaussionNB
-gaussNB.fit(X_train, y_train)
-y_test_pred = gaussNB.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(gaussNB.score(X_test, y_test))
-
-print("Multinomial Naive Bayes")
-multNB = naive_bayes.MultinomialNB()
-multNB.fit(X_train,y_train)
-y_test_pred = multNB.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(multNB.score(X_test,y_test))
-
-print('Complement Naive Bayes')
-compNB = naive_bayse.ComplementNB()
-compNB.fit(X_train, y_train)
-y_test_pred = compNB.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(compNB.score(X_test, y_test))
-
-print('Categorical Naive Bayes')
-catNB = naive_bayes.CategoricalNB()
-catNB.fit(X_train, y_train)
-y_test_pred = catNB.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(catNB.score(X_test, y_test))
-
-print('Gradient Boosting Classifier')
-gradBoost = ensemble.GradientBoostingClassifier()
-gradBoost.fit(X_train, y_train)
-y_test_pred = gradBoost.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(gradBoost.score(X_test, y_test))
-
-
-print('Without feature selection')
-X = data.iloc[:,1:34]
-y = data.iloc[:,0]
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-#clf = RandomForestClassifier(n_estimators=100)
-#clf.fit(X_train, y_train)
-#y_test_pred = clf.predict(X_test)
-#print(confusion_matrix(y_test, y_test_pred))
-#print(clf.score(X_test, y_test))
-
+#print('Ridge')
 #lin_reg = linear_model.RidgeClassifier()
 #lin_reg.fit(X_train, y_train)
 #y_test_pred = lin_reg.predict(X_test)
 #print(confusion_matrix(y_test, y_test_pred))
 #print(lin_reg.score(X_test, y_test))
+#
+#print('SGD')
+#sgdClassifier = linear_model.SGDClassifier(max_iter=1000, tol=1e-3)
+#sgdClassifier.fit(X_train,y_train)
+#y_test_pred = sgdClassifier.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(sgdClassifier.score(X_test, y_test))
+#
+#print('Linear Discriminant Analysis svd')
+#linDisc = LinearDiscriminantAnalysis(solver='svd')
+#linDisc.fit(X_train, y_train)
+#y_test_pred = linDisc.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(linDisc.score(X_test, y_test))
+#
+#print('Linear Discriminant Analysis lsqr')
+#linDisc = LinearDiscriminantAnalysis(solver='lsqr')
+#linDisc.fit(X_train, y_train)
+#y_test_pred = linDisc.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(linDisc.score(X_test, y_test))
+#
+#print('Linear Discriminant Analysis eigen')
+#linDisc = LinearDiscriminantAnalysis(solver='eigen')
+#linDisc.fit(X_train, y_train)
+#y_test_pred = linDisc.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(linDisc.score(X_test, y_test))
+#
+#print('Quadratic Discriminant Analysis')
+#quadDisc = QuadraticDiscriminantAnalysis()
+#quadDisc.fit(X_train, y_train)
+#y_test_pred = quadDisc.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(quadDisc.score(X_test, y_test))
+#
+#print('Kernel Ridge Regression')
+#kerRid = KernelRidge(alpha=1.0)
+#kerRid.fit(X_train, y_train)
+#y_test_pred = kerRid.predict(X_test)
+#y_test_pred = [int(round(x)) for x in y_test_pred]
+#print(confusion_matrix(y_test, y_test_pred))
+#print(kerRid.score(X_test, y_test))
+#
+#print('SVC')
+#svc = svm.SVC(gamma='scale')
+#svc.fit(X_train, y_train)
+#y_test_pred = svc.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(svc.score(X_test, y_test))
+#
+#print('LinearSVC')
+#lin_svc = svm.LinearSVC(max_iter=1000000)
+#lin_svc.fit(X_train,y_train)
+#y_test_pred = lin_svc.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(lin_svc.score(X_test, y_test))
+#
+#print("Multinomial Naive Bayes")
+#multNB = naive_bayes.MultinomialNB()
+#multNB.fit(X_train,y_train)
+#y_test_pred = multNB.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(multNB.score(X_test,y_test))
+#
+#print('Complement Naive Bayes')
+#compNB = naive_bayes.ComplementNB()
+#compNB.fit(X_train, y_train)
+#y_test_pred = compNB.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(compNB.score(X_test, y_test))
+#
+#print('Gradient Boosting Classifier')
+#gradBoost = ensemble.GradientBoostingClassifier()
+#gradBoost.fit(X_train, y_train)
+#y_test_pred = gradBoost.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(gradBoost.score(X_test, y_test))
+#
+#print('K Nearest Neighbors')
+#kNeigh = KNeighborsClassifier(n_neighbors=3)
+#kNeigh.fit(X_train, y_train)
+#y_test_pred = kNeigh.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(kNeigh.score(X_test, y_test))
+#
+#print('Radius Nearest Neighbors')
+#rNeigh = RadiusNeighborsClassifier(radius=42.0)
+#rNeigh.fit(X_train, y_train)
+#y_test_pred = rNeigh.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(rNeigh.score(X_test, y_test))
+#
+#print('Decision Tree Classifier')
+#dTree = DecisionTreeClassifier(random_state=0)
+#dTree.fit(X_train, y_train)
+#y_test_pred = dTree.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(dTree.score(X_test, y_test))
+#
+#print('Bagging (with K Nearest Neighbors)')
+#bagging = BaggingClassifier(KNeighborsClassifier(), max_samples=0.5, max_features=0.5)
+#bagging.fit(X_train, y_train)
+#y_test_pred = bagging.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(bagging.score(X_test, y_test))
+#
+#print('Random Forest')
+#rForest = ensemble.RandomForestClassifier(n_estimators=100)
+#rForest.fit(X_train, y_train)
+#y_test_pred = rForest.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(rForest.score(X_test, y_test))
+#
+#print('Ada Boost')
+#adaBoost = AdaBoostClassifier(n_estimators=10)
+#adaBoost.fit(X_train, y_train)
+#y_test_pred = adaBoost.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(adaBoost.score(X_test, y_test))
 
-## Kernel_Ridge:
-ker_rid = KernelRidge(alpha=1.0)
-ker_rid.fit(X_train, y_train)
-y_test_pred = ker_rid.predict(X_test)
-y_test_pred = [int(round(x)) for x in y_test_pred]
+## Classification (without feature selection):
+print('Without feature selection')
+X = data.iloc[:,1:34]
+y = data.iloc[:,0]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-print('Ridge')
-lin_reg = linear_model.RidgeClassifier()
-lin_reg.fit(X_train, y_train)
-y_test_pred = lin_reg.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(ker_rid.score(X_test, y_test))
-
-print('SGD')
-sgdClassifier = linear_model.SGDClassifier(max_iter=1000, tol=1e-3)
-sgdClassifier.fit(X_train,y_train)
-y_test_pred = sgdClassifier.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(sgdClassifier.score(X_test, y_test))
-
-print('Linear Discriminant Analysis svd')
-linDisc = LinearDiscriminantAnalysis(solver='svd')
-linDisc.fit(X_train, y_train)
-y_test_pred = linDisc.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(linDisc.score(X_test, y_test))
-
-print('Linear Discriminant Analysis lsqr')
-linDisc = LinearDiscriminantAnalysis(solver='lsqr')
-linDisc.fit(X_train, y_train)
-y_test_pred = linDisc.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(linDisc.score(X_test, y_test))
-
-print('Linear Discriminant Analysis eigen')
-linDisc = LinearDiscriminantAnalysis(solver='eigen')
-linDisc.fit(X_train, y_train)
-y_test_pred = linDisc.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(linDisc.score(X_test, y_test))
-
-print('Quadratic Discriminant Analysis')
-quadDisc = QuadraticDiscriminantAnalysis()
-quadDisc.fit(X_train, y_train)
-y_test_pred = quadDisc.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(quadDisc.score(X_test, y_test))
-
-print('SVC')
-svc = svm.SVC(gamma='scale')
-svc.fit(X_train, y_train)
-y_test_pred = svc.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(svc.score(X_test, y_test))
-
-print('LinearSVC')
-lin_svc = svm.LinearSVC()
-lin_svc.fit(X_train, y_train)
-y_test_pred = lin_svc.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(lin_svc.score(X_test, y_test))
-
-print('Gaussian Naive Bayes')
-gaussNB = naive_bayes.GaussionNB
-gaussNB.fit(X_train, y_train)
-y_test_pred = gaussNB.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(gaussNB.score(X_test, y_test))
-
-print("Multinomial Naive Bayes")
-multNB = naive_bayes.MultinomialNB()
-multNB.fit(X_train,y_train)
-y_test_pred = multNB.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(multNB.score(X_test,y_test))
-
-print('Complement Naive Bayes')
-compNB = naive_bayse.ComplementNB()
-compNB.fit(X_train, y_train)
-y_test_pred = compNB.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(compNB.score(X_test, y_test))
-
-print('Categorical Naive Bayes')
-catNB = naive_bayes.CategoricalNB()
-catNB.fit(X_train, y_train)
-y_test_pred = catNB.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(catNB.score(X_test, y_test))
-
-print('Gradient Boosting Classifier')
-gradBoost = ensemble.GradientBoostingClassifier()
-gradBoost.fit(X_train, y_train)
-y_test_pred = gradBoost.predict(X_test)
-print(confusion_matrix(y_test, y_test_pred))
-print(gradBoost.score(X_test, y_test))
+#print('Ridge')
+#lin_reg = linear_model.RidgeClassifier()
+#lin_reg.fit(X_train, y_train)
+#y_test_pred = lin_reg.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(lin_reg.score(X_test, y_test))
+#
+#print('SGD')
+#sgdClassifier = linear_model.SGDClassifier(max_iter=1000, tol=1e-3)
+#sgdClassifier.fit(X_train,y_train)
+#y_test_pred = sgdClassifier.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(sgdClassifier.score(X_test, y_test))
+#
+#print('Linear Discriminant Analysis svd')
+#linDisc = LinearDiscriminantAnalysis(solver='svd')
+#linDisc.fit(X_train, y_train)
+#y_test_pred = linDisc.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(linDisc.score(X_test, y_test))
+#
+#print('Linear Discriminant Analysis lsqr')
+#linDisc = LinearDiscriminantAnalysis(solver='lsqr')
+#linDisc.fit(X_train, y_train)
+#y_test_pred = linDisc.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(linDisc.score(X_test, y_test))
+#
+#print('Linear Discriminant Analysis eigen')
+#linDisc = LinearDiscriminantAnalysis(solver='eigen')
+#linDisc.fit(X_train, y_train)
+#y_test_pred = linDisc.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(linDisc.score(X_test, y_test))
+#
+#print('Quadratic Discriminant Analysis')
+#quadDisc = QuadraticDiscriminantAnalysis()
+#quadDisc.fit(X_train, y_train)
+#y_test_pred = quadDisc.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(quadDisc.score(X_test, y_test))
+#
+#print('Kernel Ridge Regression')
+#kerRid = KernelRidge(alpha=1.0)
+#kerRid.fit(X_train, y_train)
+#y_test_pred = kerRid.predict(X_test)
+#y_test_pred = [int(round(x)) for x in y_test_pred]
+#print(confusion_matrix(y_test, y_test_pred))
+#print(kerRid.score(X_test, y_test))
+#
+#print('SVC')
+#svc = svm.SVC(gamma='scale')
+#svc.fit(X_train, y_train)
+#y_test_pred = svc.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(svc.score(X_test, y_test))
+#
+#print('LinearSVC')
+#lin_svc = svm.LinearSVC(max_iter=1000000)
+#lin_svc.fit(X_train, y_train)
+#y_test_pred = lin_svc.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(lin_svc.score(X_test, y_test))
+#
+#print("Multinomial Naive Bayes")
+#multNB = naive_bayes.MultinomialNB()
+#multNB.fit(X_train,y_train)
+#y_test_pred = multNB.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(multNB.score(X_test,y_test))
+#
+#print('Complement Naive Bayes')
+#compNB = naive_bayes.ComplementNB()
+#compNB.fit(X_train, y_train)
+#y_test_pred = compNB.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(compNB.score(X_test, y_test))
+#
+#print('Gradient Boosting Classifier')
+#gradBoost = ensemble.GradientBoostingClassifier()
+#gradBoost.fit(X_train, y_train)
+#y_test_pred = gradBoost.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(gradBoost.score(X_test, y_test))
+#
+#print('K Nearest Neighbors')
+#kNeigh = KNeighborsClassifier(n_neighbors=3)
+#kNeigh.fit(X_train, y_train)
+#y_test_pred = kNeigh.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(kNeigh.score(X_test, y_test))
+#
+#print('Radius Nearest Neighbors')
+#rNeigh = RadiusNeighborsClassifier(radius=42.0)
+#rNeigh.fit(X_train, y_train)
+#y_test_pred = rNeigh.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(rNeigh.score(X_test, y_test))
+#
+#print('Decision Tree Classifier')
+#dTree = DecisionTreeClassifier(random_state=0)
+#dTree.fit(X_train, y_train)
+#y_test_pred = dTree.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(dTree.score(X_test, y_test))
+#
+#print('Bagging (with K Nearest Neighbors)')
+#bagging = BaggingClassifier(KNeighborsClassifier(), max_samples=0.5, max_features=0.5)
+#bagging.fit(X_train, y_train)
+#y_test_pred = bagging.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(bagging.score(X_test, y_test))
+#
+#print('Random Forest')
+#rForest = ensemble.RandomForestClassifier(n_estimators=100)
+#rForest.fit(X_train, y_train)
+#y_test_pred = rForest.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(rForest.score(X_test, y_test))
+#
+#print('Ada Boost')
+#adaBoost = AdaBoostClassifier(n_estimators=10)
+#adaBoost.fit(X_train, y_train)
+#y_test_pred = adaBoost.predict(X_test)
+#print(confusion_matrix(y_test, y_test_pred))
+#print(adaBoost.score(X_test, y_test))
