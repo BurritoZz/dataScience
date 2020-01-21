@@ -5,6 +5,7 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import confusion_matrix
 from sklearn import linear_model
 from sklearn.feature_selection import RFECV
@@ -67,6 +68,7 @@ data['Duration_of_pain'] = imputer.fit_transform(data[['Duration_of_pain']])
 data = data.drop(columns=['Workoverload'])
 data['Extremely_nervous'] = imputer.fit_transform(data[['Extremely_nervous']])
 data['Relationship_with_colleagues'] = imputer.fit_transform(data[['Relationship_with_colleagues']]) # Misschien deleten
+data = data.drop(columns=['Relationship_with_colleagues'])
 data['Irrational_thoughts_risk_lasting'] = imputer.fit_transform(data[['Irrational_thoughts_risk_lasting']])
 data['Irrational_thoughts_work'] = imputer.fit_transform(data[['Irrational_thoughts_work']])
 data['Coping_strategy'] = imputer.fit_transform(data[['Coping_strategy']])
@@ -77,6 +79,7 @@ data['Serious_disease'] = data['Serious_disease'].map(replaceZeroMostCommon)
 data['Weightloss_per_year'] = imputer.fit_transform(data[['Weightloss_per_year']])
 data['Loss_muscle_strength'] = data['Loss_muscle_strength'].map(replaceOneMostCommon)
 data['Trauma'] = data['Trauma'].map(replaceZeroMostCommon) # Misschien deleten
+data = data.drop(columns=['Trauma'])
 data['Incoordination'] = data['Incoordination'].map(replaceZeroMostCommon)
 data = data.drop(columns='working_ability')
 
@@ -127,6 +130,20 @@ y = data['Treatment']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 feature_selection_performance = []
+
+parameters = {'alpha':[1, 10, 100, 1000],
+              'fit_intercept':[True, False],
+              'normalize':[True, False],
+              'tol':[1, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6],
+              'solver':['svd', 'cholesky', 'sparse_cg', 'lsqr', 'sag']
+}
+
+clf = GridSearchCV(linear_model.RidgeClassifier(), parameters, cv=5, n_jobs=-1)
+clf.fit(X, y)
+
+print('Best SVC scores found with:')
+print('%0.3f for %r' % (clf.best_score_, clf.best_params_))
+print()
 
 print('Ridge')
 lin_reg = linear_model.RidgeClassifier()
@@ -185,12 +202,30 @@ feature_selection_performance.append(('Linear Discriminant Analysis lsqr', score
 #score = kerRid.score(X_test, y_test)
 #feature_selection_performance.append(('Kernel Ridge Regression', score, matrix))
 
+#parameters = {'C':[1,10,100,1000],
+#              'kernel':['rbf', 'sigmoid'],
+#              'gamma':['scale','auto'],
+#              'coef0':[0, 10, 100],
+#              'shrinking':[True, False],
+#              'tol':[1, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5],
+#              'class_weight':[None, 'balanced']}
+#
+#clf = GridSearchCV(svm.SVC(), parameters, cv=5, n_jobs=-1)
+#clf.fit(X_train, y_train)
+#
+#print('Best SVC scores found with:')
+#print('%0.3f for %r' % (clf.best_score_, clf.best_params_))
+#print()
+
+
 print('SVC')
 svc = svm.SVC(gamma='scale')
 svc.fit(X_train, y_train)
 y_test_pred = svc.predict(X_test)
 matrix = confusion_matrix(y_test, y_test_pred)
 score = svc.score(X_test, y_test)
+print(score)
+print(matrix)
 feature_selection_performance.append(('SVC', score, matrix))
 
 #print('LinearSVC')
