@@ -19,8 +19,12 @@ from sklearn.neighbors import RadiusNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import BaggingClassifier
 from sklearn.ensemble import AdaBoostClassifier
-import seaborn as sns
-import matplotlib.pyplot as plt
+# import seaborn as sns
+# import matplotlib.pyplot as plt
+
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import classification_report
+
 
 ## Data Preperation (functions):
 def ageToInt(ageList):
@@ -79,7 +83,6 @@ data['Loss_muscle_strength'] = data['Loss_muscle_strength'].map(replaceOneMostCo
 data['Trauma'] = data['Trauma'].map(replaceZeroMostCommon) # Misschien deleten
 data['Incoordination'] = data['Incoordination'].map(replaceZeroMostCommon)
 data = data.drop(columns='working_ability')
-
 
 #print(data['Trauma'].value_counts())
 #print(data['Trauma'].count())
@@ -193,6 +196,28 @@ matrix = confusion_matrix(y_test, y_test_pred)
 score = svc.score(X_test, y_test)
 feature_selection_performance.append(('SVC', score, matrix))
 
+"""
+#=======================================================================
+#print(svc.get_params())
+parameters = {'C':[1, 10, 100, 1000],
+              'gamma':['scale', 'auto']}
+
+clf = GridSearchCV(svm.SVC(), parameters)
+clf.fit(X_train, y_train)
+
+print("Best scores found for parameters set:")
+print("%0.3f for %r" % (clf.best_score_, clf.best_params_))
+print()
+
+print("Grid scores on development set:")
+means = clf.cv_results_['mean_test_score']
+stds = clf.cv_results_['std_test_score']
+for mean, std, params in zip(means, stds, clf.cv_results_['params']):
+    print("%0.3f (+/-%0.03f)) for %r" % (mean, std * 2, params))
+print()
+#=======================================================================
+"""
+
 #print('LinearSVC')
 #lin_svc = svm.LinearSVC(max_iter=10000)
 #lin_svc.fit(X_train,y_train)
@@ -233,6 +258,28 @@ feature_selection_performance.append(('SVC', score, matrix))
 #score = kNeigh.score(X_test, y_test)
 #feature_selection_performance.append(('K Nearest Neighbours', score, matrix))
 
+"""
+#=======================================================================
+parameters = {'n_neighbors':[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+              'weights':['uniform', 'distance'],
+              'algorithm':['ball_tree', 'kd_tree', 'brute']}
+
+clf = GridSearchCV(KNeighborsClassifier(), parameters, cv=5, n_jobs=-1)
+clf.fit(X_train, y_train)
+
+print("Best scores found for parameters set:")
+print("%0.3f for %r" % (clf.best_score_, clf.best_params_))
+print()
+
+print("Grid scores on development set:")
+means = clf.cv_results_['mean_test_score']
+stds = clf.cv_results_['std_test_score']
+for mean, std, params in zip(means, stds, clf.cv_results_['params']):
+    print("%0.3f (+/-%0.03f)) for %r" % (mean, std * 2, params))
+print()
+#=======================================================================
+"""
+
 #print('Radius Nearest Neighbors')
 #rNeigh = RadiusNeighborsClassifier(radius=42.0)
 #rNeigh.fit(X_train, y_train)
@@ -257,6 +304,35 @@ matrix = confusion_matrix(y_test, y_test_pred)
 score = bagging.score(X_test, y_test)
 feature_selection_performance.append(('Bagging K Nearest Neigbours', score, matrix))
 
+"""
+#=======================================================================
+parameters = {'base_estimator':[KNeighborsClassifier()],
+              'max_samples':[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+              'max_features':[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]}
+
+clf = GridSearchCV(BaggingClassifier(), parameters)
+clf.fit(X, y)
+
+print("Best scores found for parameters set:")
+print("%0.3f for %r" % (clf.best_score_, clf.best_params_))
+print()
+
+print("Grid scores on development set:")
+means = clf.cv_results_['mean_test_score']
+stds = clf.cv_results_['std_test_score']
+for mean, std, params in zip(means, stds, clf.cv_results_['params']):
+    print("%0.3f (+/-%0.03f)) for %r" % (mean, std * 2, params))
+print()
+#=======================================================================
+"""
+print('Bagging (with SVC')
+bagging2 = BaggingClassifier(svm.SVC(), max_samples=0.5, max_features=0.5)
+bagging2.fit(X_train, y_train)
+y_test_pred = bagging2.predict(X_test)
+matrix = confusion_matrix(y_test, y_test_pred)
+score = bagging2.score(X_test, y_test)
+print('Bagging with SVC:' + str(score))
+
 print('Random Forest')
 rForest = ensemble.RandomForestClassifier(n_estimators=100)
 rForest.fit(X_train, y_train)
@@ -264,6 +340,27 @@ y_test_pred = rForest.predict(X_test)
 matrix = confusion_matrix(y_test, y_test_pred)
 score = rForest.score(X_test, y_test)
 feature_selection_performance.append(('Random Forest', score, matrix))
+
+
+#=======================================================================
+parameters = {'n_estimators':[1, 10, 100, 1000],
+              'criterion':['gini', 'entropy']}
+
+clf = GridSearchCV(ensemble.RandomForestClassifier(), parameters, cv=5, n_jobs=-1)
+clf.fit(X_train, y_train)
+
+print("Best scores found for parameters set:")
+print("%0.3f for %r" % (clf.best_score_, clf.best_params_))
+print()
+
+print("Grid scores on development set:")
+means = clf.cv_results_['mean_test_score']
+stds = clf.cv_results_['std_test_score']
+for mean, std, params in zip(means, stds, clf.cv_results_['params']):
+    print("%0.3f (+/-%0.03f)) for %r" % (mean, std * 2, params))
+print()
+#=======================================================================
+
 
 #print('Ada Boost')
 #adaBoost = AdaBoostClassifier(n_estimators=10)
@@ -408,6 +505,12 @@ no_selection_performance.append(('LinearSVC', score, matrix))
 #matrix = confusion_matrix(y_test, y_test_pred)
 #score = bagging.score(X_test, y_test)
 #no_selection_performance.append(('Bagging with K Nearest Neighbours', score, matrix))
+
+
+n_estimator = [10, 100, 1000]
+criterion = ["gini", "entropy"]
+max_depth = ["None", 10, 100]
+min_samples_split = [2, 4, 8]
 
 print('Random Forest')
 rForest = ensemble.RandomForestClassifier(n_estimators=100)
