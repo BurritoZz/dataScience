@@ -186,7 +186,7 @@ print(confusion_matrix(y_test, y_test_pred))
 print(svc.score(X_test, y_test))
 
 print('LinearSVC')
-lin_svc = svm.LinearSVC(max_iter=1000000)
+lin_svc = svm.LinearSVC(max_iter=1000)
 lin_svc.fit(X_train,y_train)
 y_test_pred = lin_svc.predict(X_test)
 print(confusion_matrix(y_test, y_test_pred))
