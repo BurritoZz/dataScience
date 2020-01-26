@@ -20,6 +20,7 @@ from sklearn.neighbors import RadiusNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import BaggingClassifier
 from sklearn.ensemble import AdaBoostClassifier
+import pickle
 # import seaborn as sns
 # import matplotlib.pyplot as plt
 
@@ -97,7 +98,7 @@ data = data.drop(columns='working_ability')
 ## Select features for feature selection
 #X = data.iloc[:,1:34]
 #y = data.iloc[:,0]
-
+#
 #bestfeatures = SelectKBest(score_func=chi2, k=10)
 #fit = bestfeatures.fit(X, y)
 #dfscores = pd.DataFrame(fit.scores_)
@@ -116,7 +117,8 @@ data = data.drop(columns='working_ability')
 #feat_importances.nlargest(10).plot(kind='barh')
 #plt.tight_layout()
 #plt.savefig('featureImportance')
-#
+
+
 #corrmat = data.corr()
 #top_corr_features = corrmat.index
 #print(top_corr_features)
@@ -124,353 +126,137 @@ data = data.drop(columns='working_ability')
 #g=sns.heatmap(data[top_corr_features].corr(),annot=True,cmap="RdYlGn")
 #plt.savefig('hetejongen')
 
-
+#def decimalToBinary(n):
+#    b=0
+#    i=1
+#    while(n != 0):
+#        r=n%2
+#        b+=r*i
+#        n//=2
+#        i=i*10
+#    return b
+#
+#def makeList(k):
+#    a=[]
+#    if(k==0):
+#        a.append(0)
+#
+#    while(k>0):
+#        a.append(k%10)
+#        k//=10
+#    a.reverse()
+#    return a
+#
+#def checkBinary(bin, l):
+#    temp=[]
+#    for i in range(len(bin)):
+#        if(bin[i]==1):
+#            temp.append(l[i])
+#    return temp
+#
 ## Classification (with feature selection):
 print('With feature selection')
-X = data[['Age', 'leg_left_pain_intensity', 'leg_right_pain_intensity', 'arm_right_pain_intensity', 'Decreased_mobility', 'neck_pain_intensity', 'Irrational_thoughts_work', 'Fever', 'Irrational_thoughts_risk_lasting', 'Coping_strategy', 'Relationship_with_colleagues', 'low_back_pain_intensity', 'Extremely_nervous', 'Kinesiophobia_pain_stop', 'Weightloss_per_year']]
+selected_features = ['leg_right_pain_intensity', 'leg_left_pain_intensity', 'arg_right_pain_intensity', 'neck_pain_intensity', 'Kinesiophobia_physical_exercise', 'Kinesiophabia_pain_stop', 'Irrational_thoughts_work', 'Extremely_nervous', 'Age', 'Irrational_thoughts_risk_lasting', 'low_back_pain_intensity', 'Coping_strategy', 'Decreased_mobility', 'Fever', 'Serious_disease', 'Paidwork']
+#
+#binlist=[]
+#subsets=[]
+#n=len(selected_features)
+#
+#for i in range(2**n):
+#    s=decimalToBinary(i)
+#    arr=makeList(s)
+#    binlist.append(arr)
+#
+#    for i in binlist:
+#        k=0
+#        while(len(i)!=n):
+#            i.insert(k,0)
+#            k = k+1
+#for i in binlist:
+#    subsets.append(checkBinary(i,selected_features))
+#
+#with open('subsetlist', 'wb') as fp:
+#    pickle.dump(subsets, fp)
+
+with open('subsetlist', 'rb') as fp:
+    featureSubsets = pickle.load(fp)
+
+print(len(featureSubsets))
+
+X = data[featurelist]
 y = data['Treatment']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 feature_selection_performance = []
 
-parameters = {'alpha':[1, 10, 100, 1000],
-              'fit_intercept':[True, False],
-              'normalize':[True, False],
-              'tol':[1, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6],
-              'solver':['svd', 'cholesky', 'sparse_cg', 'lsqr', 'sag']
-}
-
-clf = GridSearchCV(linear_model.RidgeClassifier(), parameters, cv=5, n_jobs=-1)
-clf.fit(X, y)
-
-print('Best SVC scores found with:')
-print('%0.3f for %r' % (clf.best_score_, clf.best_params_))
-print()
-
-print('Ridge')
-lin_reg = linear_model.RidgeClassifier()
-lin_reg.fit(X_train, y_train)
-y_test_pred = lin_reg.predict(X_test)
-matrix = confusion_matrix(y_test, y_test_pred)
-score = lin_reg.score(X_test, y_test)
-feature_selection_performance.append(('Ridge', score, matrix))
-
-#print('SGD')
-#sgdClassifier = linear_model.SGDClassifier(max_iter=1000, tol=1e-3)
-#sgdClassifier.fit(X_train,y_train)
-#y_test_pred = sgdClassifier.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = sgdClassifier.score(X_test, y_test)
-#feature_selection_performance.append(('SGD', score, matrix))
-
-#print('Linear Discriminant Analysis svd')
-#linDisc = LinearDiscriminantAnalysis(solver='svd')
-#linDisc.fit(X_train, y_train)
-#y_test_pred = linDisc.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = linDisc.score(X_test, y_test)
-#feature_selection_performance.append(('Linear Discriminant Analysis svd', score, matrix))
-
-print('Linear Discriminant Analysis lsqr')
-linDisc = LinearDiscriminantAnalysis(solver='lsqr')
-linDisc.fit(X_train, y_train)
-y_test_pred = linDisc.predict(X_test)
-matrix = confusion_matrix(y_test, y_test_pred)
-score = linDisc.score(X_test, y_test)
-feature_selection_performance.append(('Linear Discriminant Analysis lsqr', score, matrix))
-
-#print('Linear Discriminant Analysis eigen')
-#linDisc = LinearDiscriminantAnalysis(solver='eigen')
-#linDisc.fit(X_train, y_train)
-#y_test_pred = linDisc.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = linDisc.score(X_test, y_test)
-#feature_selection_performance.append(('Linear Discriminant Analysis eigen', score, matrix))
-
-#print('Quadratic Discriminant Analysis')
-#quadDisc = QuadraticDiscriminantAnalysis()
-#quadDisc.fit(X_train, y_train)
-#y_test_pred = quadDisc.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = quadDisc.score(X_test, y_test)
-#feature_selection_performance.append(('Quadratic Discriminant Analysis', score, matrix))
-
-#print('Kernel Ridge Regression')
-#kerRid = KernelRidge(alpha=1.0)
-#kerRid.fit(X_train, y_train)
-#y_test_pred = kerRid.predict(X_test)
-#y_test_pred = [int(round(x)) for x in y_test_pred]
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = kerRid.score(X_test, y_test)
-#feature_selection_performance.append(('Kernel Ridge Regression', score, matrix))
-
-#parameters = {'C':[1,10,100,1000],
-#              'kernel':['rbf', 'sigmoid'],
-#              'gamma':['scale','auto'],
-#              'coef0':[0, 10, 100],
-#              'shrinking':[True, False],
-#              'tol':[1, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5],
-#              'class_weight':[None, 'balanced']}
-#
-#clf = GridSearchCV(svm.SVC(), parameters, cv=5, n_jobs=-1)
-#clf.fit(X_train, y_train)
-#
-#print('Best SVC scores found with:')
-#print('%0.3f for %r' % (clf.best_score_, clf.best_params_))
-#print()
-
-
-print('SVC')
-svc = svm.SVC(gamma='scale')
-svc.fit(X_train, y_train)
-y_test_pred = svc.predict(X_test)
-matrix = confusion_matrix(y_test, y_test_pred)
-score = svc.score(X_test, y_test)
-print(score)
-print(matrix)
-feature_selection_performance.append(('SVC', score, matrix))
-
-"""
-#=======================================================================
-#print(svc.get_params())
-parameters = {'C':[1, 10, 100, 1000],
-              'gamma':['scale', 'auto']}
-
-clf = GridSearchCV(svm.SVC(), parameters)
-clf.fit(X_train, y_train)
-
-print("Best scores found for parameters set:")
-print("%0.3f for %r" % (clf.best_score_, clf.best_params_))
-print()
-
-print("Grid scores on development set:")
-means = clf.cv_results_['mean_test_score']
-stds = clf.cv_results_['std_test_score']
-for mean, std, params in zip(means, stds, clf.cv_results_['params']):
-    print("%0.3f (+/-%0.03f)) for %r" % (mean, std * 2, params))
-print()
-#=======================================================================
-"""
-
-#print('LinearSVC')
-#lin_svc = svm.LinearSVC(max_iter=10000)
-#lin_svc.fit(X_train,y_train)
-#y_test_pred = lin_svc.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = lin_svc.score(X_test, y_test)
-#feature_selection_performance.append(('LinearSVC', score, matrix))
-
-#print("Multinomial Naive Bayes")
-#multNB = naive_bayes.MultinomialNB()
-#multNB.fit(X_train,y_train)
-#y_test_pred = multNB.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = multNB.score(X_test,y_test)
-#feature_selection_performance.append(('Multinomial Naive Bayes', score, matrix))
-
-#print('Complement Naive Bayes')
-#compNB = naive_bayes.ComplementNB()
-#compNB.fit(X_train, y_train)
-#y_test_pred = compNB.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = compNB.score(X_test, y_test)
-#feature_selection_performance.append(('Complement Naive Bayes', score, matrix))
-
-#print('Gradient Boosting Classifier')
-#gradBoost = ensemble.GradientBoostingClassifier()
-#gradBoost.fit(X_train, y_train)
-#y_test_pred = gradBoost.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = gradBoost.score(X_test, y_test)
-#feature_selection_performance.append(('Gradient Boosting Classifier', score, matrix))
-
-#print('K Nearest Neighbors')
-#kNeigh = KNeighborsClassifier(n_neighbors=3)
-#kNeigh.fit(X_train, y_train)
-#y_test_pred = kNeigh.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = kNeigh.score(X_test, y_test)
-#feature_selection_performance.append(('K Nearest Neighbours', score, matrix))
-
-"""
-#=======================================================================
-parameters = {'n_neighbors':[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-              'weights':['uniform', 'distance'],
-              'algorithm':['ball_tree', 'kd_tree', 'brute']}
-
-clf = GridSearchCV(KNeighborsClassifier(), parameters, cv=5, n_jobs=-1)
-clf.fit(X_train, y_train)
-
-print("Best scores found for parameters set:")
-print("%0.3f for %r" % (clf.best_score_, clf.best_params_))
-print()
-
-print("Grid scores on development set:")
-means = clf.cv_results_['mean_test_score']
-stds = clf.cv_results_['std_test_score']
-for mean, std, params in zip(means, stds, clf.cv_results_['params']):
-    print("%0.3f (+/-%0.03f)) for %r" % (mean, std * 2, params))
-print()
-#=======================================================================
-"""
-
-#print('Radius Nearest Neighbors')
-#rNeigh = RadiusNeighborsClassifier(radius=42.0)
-#rNeigh.fit(X_train, y_train)
-#y_test_pred = rNeigh.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = rNeigh.score(X_test, y_test)
-#feature_selection_performance.append(('Radius Nearest Neighbours', score, matrix))
-
-#print('Decision Tree Classifier')
-#dTree = DecisionTreeClassifier(random_state=0)
-#dTree.fit(X_train, y_train)
-#y_test_pred = dTree.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = dTree.score(X_test, y_test)
-#feature_selection_performance.append(('Decision Tree Classifier', score, matrix))
-
-print('Bagging (with K Nearest Neighbors)')
-bagging = BaggingClassifier(KNeighborsClassifier(), max_samples=0.5, max_features=0.5)
-bagging.fit(X_train, y_train)
-y_test_pred = bagging.predict(X_test)
-matrix = confusion_matrix(y_test, y_test_pred)
-score = bagging.score(X_test, y_test)
-feature_selection_performance.append(('Bagging K Nearest Neigbours', score, matrix))
-
-"""
-#=======================================================================
-parameters = {'base_estimator':[KNeighborsClassifier()],
-              'max_samples':[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
-              'max_features':[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]}
-
-clf = GridSearchCV(BaggingClassifier(), parameters)
-clf.fit(X, y)
-
-print("Best scores found for parameters set:")
-print("%0.3f for %r" % (clf.best_score_, clf.best_params_))
-print()
-
-print("Grid scores on development set:")
-means = clf.cv_results_['mean_test_score']
-stds = clf.cv_results_['std_test_score']
-for mean, std, params in zip(means, stds, clf.cv_results_['params']):
-    print("%0.3f (+/-%0.03f)) for %r" % (mean, std * 2, params))
-print()
-#=======================================================================
-"""
-print('Bagging (with SVC')
-bagging2 = BaggingClassifier(svm.SVC(), max_samples=0.5, max_features=0.5)
-bagging2.fit(X_train, y_train)
-y_test_pred = bagging2.predict(X_test)
-matrix = confusion_matrix(y_test, y_test_pred)
-score = bagging2.score(X_test, y_test)
-print('Bagging with SVC:' + str(score))
-
-print('Random Forest')
-rForest = ensemble.RandomForestClassifier(n_estimators=100)
-rForest.fit(X_train, y_train)
-y_test_pred = rForest.predict(X_test)
-matrix = confusion_matrix(y_test, y_test_pred)
-score = rForest.score(X_test, y_test)
-feature_selection_performance.append(('Random Forest', score, matrix))
-
-
-#=======================================================================
-parameters = {'n_estimators':[1, 10, 100, 1000],
-              'criterion':['gini', 'entropy']}
-
-clf = GridSearchCV(ensemble.RandomForestClassifier(), parameters, cv=5, n_jobs=-1)
-clf.fit(X_train, y_train)
-
-print("Best scores found for parameters set:")
-print("%0.3f for %r" % (clf.best_score_, clf.best_params_))
-print()
-
-print("Grid scores on development set:")
-means = clf.cv_results_['mean_test_score']
-stds = clf.cv_results_['std_test_score']
-for mean, std, params in zip(means, stds, clf.cv_results_['params']):
-    print("%0.3f (+/-%0.03f)) for %r" % (mean, std * 2, params))
-print()
-#=======================================================================
-
-
-#print('Ada Boost')
-#adaBoost = AdaBoostClassifier(n_estimators=10)
-#adaBoost.fit(X_train, y_train)
-#y_test_pred = adaBoost.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = adaBoost.score(X_test, y_test)
-#feature_selection_performance.append(('Ada Boost', score, matrix))
 
 # Classification (without feature selection):
 print('Without feature selection')
-X_train = data.iloc[:,1:34]
-y_train = data.iloc[:,0]
+X = data.iloc[:,1:34]
+y = data.iloc[:,0]
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 no_selection_performance = []
 
 print('Ridge')
-lin_reg = linear_model.RidgeClassifier()
+lin_reg = linear_model.RidgeClassifier(alpha=1000, fit_intercept=True, normalize=False, solver='lsqr', tol=1e-2)
 lin_reg.fit(X_train, y_train)
 y_test_pred = lin_reg.predict(X_test)
 matrix = confusion_matrix(y_test, y_test_pred)
 score = lin_reg.score(X_test, y_test)
 no_selection_performance.append(('Ridge', score, matrix))
 
-#print('SGD')
-#sgdClassifier = linear_model.SGDClassifier(max_iter=1000, tol=1e-3)
-#sgdClassifier.fit(X_train,y_train)
-#y_test_pred = sgdClassifier.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = sgdClassifier.score(X_test, y_test)
-#no_selection_performance.append(('SGD', score, matrix))
+print('SGD')
+sgdClassifier = linear_model.SGDClassifier(fit_intercept=True, loss='log', max_iter=1000, penalty='l1', shuffle=False, tol=0.01)
+sgdClassifier.fit(X_train,y_train)
+y_test_pred = sgdClassifier.predict(X_test)
+matrix = confusion_matrix(y_test, y_test_pred)
+score = sgdClassifier.score(X_test, y_test)
+no_selection_performance.append(('SGD', score, matrix))
 
-#print('Linear Discriminant Analysis svd')
-#linDisc = LinearDiscriminantAnalysis(solver='svd')
-#linDisc.fit(X_train, y_train)
-#y_test_pred = linDisc.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = linDisc.score(X_test, y_test)
-#no_selection_performance.append(('Linear Discrimitnant Analysis svd', score, matrix))
+print('Linear Discriminant Analysis svd')
+linDisc = LinearDiscriminantAnalysis(solver='svd')
+linDisc.fit(X_train, y_train)
+y_test_pred = linDisc.predict(X_test)
+matrix = confusion_matrix(y_test, y_test_pred)
+score = linDisc.score(X_test, y_test)
+no_selection_performance.append(('Linear Discrimitnant Analysis svd', score, matrix))
 
 print('Linear Discriminant Analysis lsqr')
-linDisc = LinearDiscriminantAnalysis(solver='lsqr')
+linDisc = LinearDiscriminantAnalysis(solver='eigen', store_covariance=True, tol=1e-2)
 linDisc.fit(X_train, y_train)
 y_test_pred = linDisc.predict(X_test)
 matrix = confusion_matrix(y_test, y_test_pred)
 score = linDisc.score(X_test, y_test)
 no_selection_performance.append(('Linear Discriminant Analysis lsqr', score, matrix))
 
-#print('Linear Discriminant Analysis eigen')
-#linDisc = LinearDiscriminantAnalysis(solver='eigen')
-#linDisc.fit(X_train, y_train)
-#y_test_pred = linDisc.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = linDisc.score(X_test, y_test)
-#no_selection_performance.append(('Linear Discriminant Analysis eigen', score, matrix))
+print('Linear Discriminant Analysis eigen')
+linDisc = LinearDiscriminantAnalysis(solver='eigen')
+linDisc.fit(X_train, y_train)
+y_test_pred = linDisc.predict(X_test)
+matrix = confusion_matrix(y_test, y_test_pred)
+score = linDisc.score(X_test, y_test)
+no_selection_performance.append(('Linear Discriminant Analysis eigen', score, matrix))
 
-#print('Quadratic Discriminant Analysis')
-#quadDisc = QuadraticDiscriminantAnalysis()
-#quadDisc.fit(X_train, y_train)
-#y_test_pred = quadDisc.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = quadDisc.score(X_test, y_test)
-#no_selection_performance.append(('Quadratic Discriminant Analysis', score, matrix))
+print('Quadratic Discriminant Analysis')
+quadDisc = QuadraticDiscriminantAnalysis()
+quadDisc.fit(X_train, y_train)
+y_test_pred = quadDisc.predict(X_test)
+matrix = confusion_matrix(y_test, y_test_pred)
+score = quadDisc.score(X_test, y_test)
+no_selection_performance.append(('Quadratic Discriminant Analysis', score, matrix))
 
-#print('Kernel Ridge Regression')
-#kerRid = KernelRidge(alpha=1.0)
-#kerRid.fit(X_train, y_train)
-#y_test_pred = kerRid.predict(X_test)
-#y_test_pred = [int(round(x)) for x in y_test_pred]
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = kerRid.score(X_test, y_test)
-#no_selection_performance.append(('Kernel Ridge Regression', score, matrix))
+print('Kernel Ridge Regression')
+kerRid = KernelRidge(alpha=1.0)
+kerRid.fit(X_train, y_train)
+y_test_pred = kerRid.predict(X_test)
+y_test_pred = [int(round(x)) for x in y_test_pred]
+matrix = confusion_matrix(y_test, y_test_pred)
+score = kerRid.score(X_test, y_test)
+no_selection_performance.append(('Kernel Ridge Regression', score, matrix))
 
 print('SVC')
-svc = svm.SVC(gamma='scale')
+svc = svm.SVC(C=1, class_weight=None, coef0=0, gamma='scale', kernel='rbf', shrinking=True, tol=1e-1)
 svc.fit(X_train, y_train)
 y_test_pred = svc.predict(X_test)
 matrix = confusion_matrix(y_test, y_test_pred)
@@ -478,90 +264,84 @@ score = svc.score(X_test, y_test)
 no_selection_performance.append(('SVC', score, matrix))
 
 print('LinearSVC')
-lin_svc = svm.LinearSVC(max_iter=10000)
+lin_svc = svm.LinearSVC(C=5, class_weight='balanced', loss='squared_hinge', tol=0.0001, max_iter=100000)
 lin_svc.fit(X_train, y_train)
 y_test_pred = lin_svc.predict(X_test)
 matrix = confusion_matrix(y_test, y_test_pred)
 score = lin_svc.score(X_test, y_test)
 no_selection_performance.append(('LinearSVC', score, matrix))
 
-#print("Multinomial Naive Bayes")
-#multNB = naive_bayes.MultinomialNB()
-#multNB.fit(X_train,y_train)
-#y_test_pred = multNB.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = multNB.score(X_test,y_test)
-#no_selection_performance.append(('Multinomial Naive Bayes', score, matrix))
+print("Multinomial Naive Bayes")
+multNB = naive_bayes.MultinomialNB()
+multNB.fit(X_train,y_train)
+y_test_pred = multNB.predict(X_test)
+matrix = confusion_matrix(y_test, y_test_pred)
+score = multNB.score(X_test,y_test)
+no_selection_performance.append(('Multinomial Naive Bayes', score, matrix))
 
-#print('Complement Naive Bayes')
-#compNB = naive_bayes.ComplementNB()
-#compNB.fit(X_train, y_train)
-#y_test_pred = compNB.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = compNB.score(X_test, y_test)
-#no_selection_performance.append(('Complement Naive Bayes', score, matrix))
+print('Complement Naive Bayes')
+compNB = naive_bayes.ComplementNB()
+compNB.fit(X_train, y_train)
+y_test_pred = compNB.predict(X_test)
+matrix = confusion_matrix(y_test, y_test_pred)
+score = compNB.score(X_test, y_test)
+no_selection_performance.append(('Complement Naive Bayes', score, matrix))
 
-#print('Gradient Boosting Classifier')
-#gradBoost = ensemble.GradientBoostingClassifier()
-#gradBoost.fit(X_train, y_train)
-#y_test_pred = gradBoost.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = gradBoost.score(X_test, y_test)
-#no_selection_performance.append(('Gradient Boosting Classifier', score, matrix))
+print('Gradient Boosting Classifier')
+gradBoost = ensemble.GradientBoostingClassifier()
+gradBoost.fit(X_train, y_train)
+y_test_pred = gradBoost.predict(X_test)
+matrix = confusion_matrix(y_test, y_test_pred)
+score = gradBoost.score(X_test, y_test)
+no_selection_performance.append(('Gradient Boosting Classifier', score, matrix))
 
-#print('K Nearest Neighbors')
-#kNeigh = KNeighborsClassifier(n_neighbors=3)
-#kNeigh.fit(X_train, y_train)
-#y_test_pred = kNeigh.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = kNeigh.score(X_test, y_test)
-#no_selection_performance.append(('K Nearest Neighbours', score, matrix))
+print('K Nearest Neighbors')
+kNeigh = KNeighborsClassifier(n_neighbors=3)
+kNeigh.fit(X_train, y_train)
+y_test_pred = kNeigh.predict(X_test)
+matrix = confusion_matrix(y_test, y_test_pred)
+score = kNeigh.score(X_test, y_test)
+no_selection_performance.append(('K Nearest Neighbours', score, matrix))
 
-#print('Radius Nearest Neighbors')
-#rNeigh = RadiusNeighborsClassifier(radius=42.0)
-#rNeigh.fit(X_train, y_train)
-#y_test_pred = rNeigh.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = rNeigh.score(X_test, y_test)
-#no_selection_performance.append(('Radius Nearest Neighbours', score, matrix))
+print('Radius Nearest Neighbors')
+rNeigh = RadiusNeighborsClassifier(radius=42.0)
+rNeigh.fit(X_train, y_train)
+y_test_pred = rNeigh.predict(X_test)
+matrix = confusion_matrix(y_test, y_test_pred)
+score = rNeigh.score(X_test, y_test)
+no_selection_performance.append(('Radius Nearest Neighbours', score, matrix))
 
-#print('Decision Tree Classifier')
-#dTree = DecisionTreeClassifier(random_state=0)
-#dTree.fit(X_train, y_train)
-#y_test_pred = dTree.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = dTree.score(X_test, y_test)
-#no_selection_performance.append(('Decision Tree Classifier', score, matrix))
+print('Decision Tree Classifier')
+dTree = DecisionTreeClassifier(random_state=0)
+dTree.fit(X_train, y_train)
+y_test_pred = dTree.predict(X_test)
+matrix = confusion_matrix(y_test, y_test_pred)
+score = dTree.score(X_test, y_test)
+no_selection_performance.append(('Decision Tree Classifier', score, matrix))
 
-#print('Bagging (with K Nearest Neighbors)')
-#bagging = BaggingClassifier(KNeighborsClassifier(), max_samples=0.5, max_features=0.5)
-#bagging.fit(X_train, y_train)
-#y_test_pred = bagging.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = bagging.score(X_test, y_test)
-#no_selection_performance.append(('Bagging with K Nearest Neighbours', score, matrix))
-
-
-n_estimator = [10, 100, 1000]
-criterion = ["gini", "entropy"]
-max_depth = ["None", 10, 100]
-min_samples_split = [2, 4, 8]
+print('Bagging (with K Nearest Neighbors)')
+bagging = BaggingClassifier(KNeighborsClassifier(), max_samples=0.5, max_features=0.5)
+bagging.fit(X_train, y_train)
+y_test_pred = bagging.predict(X_test)
+matrix = confusion_matrix(y_test, y_test_pred)
+score = bagging.score(X_test, y_test)
+no_selection_performance.append(('Bagging with K Nearest Neighbours', score, matrix))
 
 print('Random Forest')
-rForest = ensemble.RandomForestClassifier(n_estimators=100)
+rForest = ensemble.RandomForestClassifier(n_estimators=1000, criterion='gini', max_features='log2', min_samples_leaf=3, min_samples_split=3)
 rForest.fit(X_train, y_train)
 y_test_pred = rForest.predict(X_test)
 matrix = confusion_matrix(y_test, y_test_pred)
 score = rForest.score(X_test, y_test)
 no_selection_performance.append(('Random Forest', score, matrix))
 
-#print('Ada Boost')
-#adaBoost = AdaBoostClassifier(n_estimators=10)
-#adaBoost.fit(X_train, y_train)
-#y_test_pred = adaBoost.predict(X_test)
-#matrix = confusion_matrix(y_test, y_test_pred)
-#score = adaBoost.score(X_test, y_test)
-#no_selection_performance.append(('Ada Boost', score, matrix))
+print('Ada Boost')
+adaBoost = AdaBoostClassifier(n_estimators=10)
+adaBoost.fit(X_train, y_train)
+y_test_pred = adaBoost.predict(X_test)
+matrix = confusion_matrix(y_test, y_test_pred)
+score = adaBoost.score(X_test, y_test)
+no_selection_performance.append(('Ada Boost', score, matrix))
 
 feature_selection_performance = sorted(feature_selection_performance, key=lambda x: x[1])
 no_selection_performance = sorted(no_selection_performance, key=lambda x: x[1])
